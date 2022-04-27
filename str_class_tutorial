@@ -238,6 +238,22 @@ for k, v in character_enumeration(test).items():
 Separator: s, ['Te', 't thi', ' ', 'tring. 123!@#'], Joined: Tet thi tring. 123!@#
 Separator: t, ['Tes', ' ', 'his s', 'ring. 123!@#'], Joined: Tes his sring. 123!@#
 
+Information sent through the internet is often base64 encoded to preserve integrity of the message. By default, base64
+encoded strings have a new line character at the end '\n' which will impact the representation of the string. Let's use
+the 'rstrip' method to get rid of that:
+
+base64.encodebytes(test.encode('ascii')).decode("ascii").rstrip()
+
+We can also reverse this directly and it will decode as base64 in reverse but the output will not be the same as the
+original string. This is an obfuscation method:
+
+base64.encodebytes(test.encode('ascii')).decode("ascii").rstrip()[::-1]
+
+Which can then be base64 encoded again to further obfuscate a message. Keep in mind that obfucscation is not encryption.
+To secure a message, it must be encrypted. Layering obfuscation and encryption is a common tactic:
+
+base64.encodebytes(base64.encodebytes(test.encode('ascii')).decode("ascii").rstrip()[::-1].encode('ascii')).rstrip()
+
 Let's take what we know now and show what this test variable looks like when it is encoded various ways.  Python has
 many codecs available.  The number of codecs available depends on the version of python you are using.  The human
 readable form of a string looks a certain way but to a machine it may be encoded to look many different ways and still
