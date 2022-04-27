@@ -240,9 +240,10 @@ Separator: t, ['Tes', ' ', 'his s', 'ring. 123!@#'], Joined: Tes his sring. 123!
 
 Let's take what we know now and show what this test variable looks like when it is encoded various ways.  Python has
 many codecs available.  The number of codecs available depends on the version of python you are using.  The human
-readable form of a string looks a certain way but to a machine it be encoded to look many different ways but still
+readable form of a string looks a certain way but to a machine it may be encoded to look many different ways and still
 contain the same data.  This is the basis of data obfuscation. The following script will encode the test variable
-using all of these encodings and provide the binary and base64 encoded output, forward and reverse:
+using all of these encodings and provide the binary and base64 encoded output, forward and reverse. Note that the base64
+data doesn't differ, except for when certain codecs are used, because the encoding is done on bytes:
 """
 
 import pprint
