@@ -288,8 +288,8 @@ def info(string: str) -> Dict:
             {
                 "hex_list": [hex(ord(i)) for i in string],
                 "reversed": string[::-1],
-                "base64_encoded": base64.encodebytes(b"string").decode("ascii").strip(),
-                "base64_reversed": base64.encodebytes(b"string").decode("ascii").strip()[::-1],
+                "base64_encoded": base64.encodebytes(string.encode('ascii')).decode("ascii").strip(),
+                "base64_reversed": base64.encodebytes(string.encode('ascii')).decode("ascii").strip()[::-1],
                 "binary": ''.join(map(bin,bytearray(string.encode('ascii')))),
                 "length": len(string),
                 "isupper": string.isupper(),
