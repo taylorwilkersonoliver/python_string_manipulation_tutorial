@@ -1,0 +1,328 @@
+"""
+Python String Manipulation
+
+Python strings, like everything in python, are objects. Sometimes things can get tricky with knowing when to encode or decode so just remember this:
+
+    String = encode
+    Bytes = decode
+
+A string is bytes decoded using a codec like "ASCII" or "UTF-8". When sending a string through the internet it is encoded with a codec, transmitted, decoded with the same codec, and then displayed.  Let's do that programmatically because for me explaining things just gets confusing and seeing it in code makes more sense.
+
+    plain_text = "plain text string"
+    plain_text_bytes = plain_text.encode("UTF-8")
+    plain_text_bytes_decoded = plain_text_bytes.decode("UTF-8")
+    if plain_text == plain_text_bytes_decoded:
+	print("Congratulations, everything is fine.")
+    else:
+        print("Something is very wrong.")
+
+What is the point of encoding to bytes with a codec?  Well, first of all, humans and machines read information differently.  If you type this into a python console you'll get an error:
+
+this
+Traceback (most recent call last):
+  File "<input>", line 1, in <module>
+NameError: name 'this' is not defined
+
+However, if you type print("this") into the console you'll get:
+
+print("this")
+this
+
+Without the quotations the word 'this' is seen as a variable but with the quotation marks that ('this') becomes an str
+object variable:
+
+print(f"That {type('this')} is 'this'")
+That <class 'str'> is 'this'
+
+Since the str object isn't just 'this' and is an object, we can do a lot more than just print text and encode to
+bytes. I think of the str class as having two types of methods: manipulation and statistics gathering. The methods
+that you can loop through don't have to be applied to the whole string at once and can be used on a per character
+basis. You can check each character or the string as a whole.  Some of the methods will change the output while others
+will return a True or False.
+
+test = "Test this string. 123!@#"
+str_methods = ['capitalize', 'casefold', 'center', 'count', 'encode', 'endswith', 'expandtabs', 'find', 'format', 'format_map',
+'index', 'isalnum', 'isalpha', 'isascii', 'isdecimal', 'isdigit', 'isidentifier', 'islower', 'isnumeric',
+'isprintable', 'isspace', 'istitle', 'isupper', 'join', 'ljust', 'lower', 'lstrip', 'maketrans', 'partition',
+'removeprefix', 'removesuffix', 'replace', 'rfind', 'rindex', 'rjust', 'rpartition', 'rsplit', 'rstrip', 'split',
+'splitlines', 'startswith', 'strip', 'swapcase', 'title', 'translate', 'upper', 'zfill']
+
+type_errors = []
+loopable_str_methods = []
+for i in str_methods:
+    this = str.__dict__[i]
+    try:
+        print(f"{i} : {this(test)}")
+        loopable_str_methods.append(i)
+    except TypeError:
+        type_errors.append(i)
+        pass
+print(type_errors)
+print(loopable_str_methods)
+
+capitalize : Test this string. 123!@#
+casefold : test this string. 123!@#
+encode : b'Test this string. 123!@#'
+expandtabs : Test this string. 123!@#
+format : Test this string. 123!@#
+isalnum : False
+isalpha : False
+isascii : True
+isdecimal : False
+isdigit : False
+isidentifier : False
+islower : False
+isnumeric : False
+isprintable : True
+isspace : False
+istitle : False
+isupper : False
+lower : test this string. 123!@#
+lstrip : Test this string. 123!@#
+rsplit : ['Test', 'this', 'string.', '123!@#']
+rstrip : Test this string. 123!@#
+split : ['Test', 'this', 'string.', '123!@#']
+splitlines : ['Test this string. 123!@#']
+strip : Test this string. 123!@#
+swapcase : tEST THIS STRING. 123!@#
+title : Test This String. 123!@#
+upper : TEST THIS STRING. 123!@#
+['center', 'count', 'endswith', 'find', 'format_map', 'index', 'join', 'ljust', 'maketrans', 'partition',
+'removeprefix', 'removesuffix', 'replace', 'rfind', 'rindex', 'rjust', 'rpartition', 'startswith', 'translate',
+'zfill']
+['capitalize', 'casefold', 'encode', 'expandtabs', 'format', 'isalnum', 'isalpha', 'isascii', 'isdecimal',
+'isdigit', 'isidentifier', 'islower', 'isnumeric', 'isprintable', 'isspace', 'istitle', 'isupper', 'lower', 'lstrip',
+'rsplit', 'rstrip', 'split', 'splitlines', 'strip', 'swapcase', 'title', 'upper']
+
+Now, let's see how we can use some of these in a function. Let's determine the total number of characters in the
+string, how many are alphabetical characters, and how many are alphanumeric characters.  The remainder must be symbols
+so we can determine that by subtracting the total alphanumeric amount from the total amount. Since the ' ' (space)
+character is counted as a symbol since it's not a letter or a number we should subtract that amount as well:
+
+def character_enumeration(string):
+    out = {}
+    total = 0
+    total_alnum = 0
+    spaces = 0
+    for i in string:
+        total = total + 1
+        if i.isalnum():
+            total_alnum = total_alnum + 1
+        if i.isalpha():
+            try:
+                count = out[f"{i}__count"] + 1
+                out.update({f"{i}__count": count})
+            except:
+                out.update({f"{i}__count": 1})
+        if i == ' ':
+            spaces = spaces + 1
+    out.update({"total_alpha__count": total, "total_alnum__count": total_alnum,
+    "total_symbol__count": total - total_alnum - spaces, "spaces__count": spaces})
+    return out
+
+print(letter_enumeration(test))
+
+{'T_count': 1, 'e_count': 1, 's_count': 3, 't_count': 3, 'h_count': 1, 'i_count': 2, 'r_count': 1, 'n_count': 1,
+'g_count': 1, 'total_alpha': 24, 'total_alnum': 17, 'total_symbol': 4, 'spaces': 3}
+
+Since we have a function that returns dict keys with a unique character combination, we can use the 'replace'
+method on the keys to put anything there, :
+
+def find_and_replace_in_key_name(some_dict):
+    for k, v in some_dict.items():
+        print(f"The {k} key can become {k.replace('__', '_anything_')} using the 'replace' method'. The value, 'v' for this key is : {v}")
+find_and_replace_in_key_name(character_enumeration(test))
+
+The T__count key can become T_anything_count using the 'replace' method'. The value, 'v' for this key is : 1
+The e__count key can become e_anything_count using the 'replace' method'. The value, 'v' for this key is : 1
+The s__count key can become s_anything_count using the 'replace' method'. The value, 'v' for this key is : 3
+The t__count key can become t_anything_count using the 'replace' method'. The value, 'v' for this key is : 3
+The h__count key can become h_anything_count using the 'replace' method'. The value, 'v' for this key is : 1
+The i__count key can become i_anything_count using the 'replace' method'. The value, 'v' for this key is : 2
+The r__count key can become r_anything_count using the 'replace' method'. The value, 'v' for this key is : 1
+The n__count key can become n_anything_count using the 'replace' method'. The value, 'v' for this key is : 1
+The g__count key can become g_anything_count using the 'replace' method'. The value, 'v' for this key is : 1
+The total_alpha__count key can become total_alpha_anything_count using the 'replace' method'. The value, 'v' for this key is : 24
+The total_alnum__count key can become total_alnum_anything_count using the 'replace' method'. The value, 'v' for this key is : 17
+The total_symbol__count key can become total_symbol_anything_count using the 'replace' method'. The value, 'v' for this key is : 4
+The spaces__count key can become spaces_anything_count using the 'replace' method'. The value, 'v' for this key is : 3
+
+In order to enumerate the special characters we can use a truth statement and then specify which special character
+or sequence of characters we are enumerating like we did with the ' ' (space) character. We could have also used the
+'isspace' method.
+
+Another useful string manipulation technique is slicing.  There are three different characteristics to keep in mind
+when slicing: start, end, and step.  Those three characteristics can be specified like so:
+
+print(test[0::])
+
+The start position for that print statement is at index 0.  If we change that to a 1 then it will print starting at
+index 1 like so:
+
+print(test[1::])
+
+A string can be started at up to the length of the string but to print the last character that index it needs to be
+subtracted by 1.  So, len('some string') - 1 or in the test case we are using:
+
+print(test[len(test) - 1::])
+
+That prints just the last character '#'.
+
+The stop point can be the length of the string, which will include the last character:
+
+print(test[:len(test):])
+Test this string. 123!@#
+
+If you subtract one from that, you can drop characters from the end of the string:
+
+print(test[:len(test) - 1:])
+Test this string. 123!@
+
+The step can be a number or an equation. To print every 3rd letter, we can write [::3]:
+
+print(test[::3])
+Tth rg1!
+
+The start, stop, or step could also be an equation as long as the output of that equation is converted to an integer:
+
+print(test[int(len(test)/3)::])
+s string. 123!@#
+print(test[:int(len(test)/3):])
+Test thi
+print(test[::int(len(test)/3)])
+Ts.
+
+The step can also be used to iterate through the string backwards:
+
+print(test[::-1])
+#@!321 .gnirts siht tseT
+print(test[::-3])
+#3 ntsts
+print(test[::-int(len(test)/3)])
+#gi
+
+The 'format' method can be used on a string or the string can be simply written with the 'f' character preceding it
+and the variable in the string replacing curly braces as they are entered or enclosed in curly braces. When using
+the 'format' method on a string, you must include enough variables as you have curley brace pairs.
+
+print(f"{test} << the first variable replaced this and the second variable replaced this >> {test}")
+Test this string. 123!@# << the first variable replaced this and the second variable replaced this >> Test this string. 123!@#
+
+print("{} << the first variable replaced this and the second variable replaced this >> {}".format(test, test))
+Test this string. 123!@# << the first variable replaced this and the second variable replaced this >> Test this string. 123!@#
+
+The 'split' and 'join' methods create and use lists respectively.  In the 'split' method, you can specify what the
+string is split by, otherwise it is split by any whitespace character such as ' ' (space), \t (tab) or \n (new line)
+
+print(test.split())
+['Test', 'this', 'string.', '123!@#']
+
+The character_enumeration function that we created earlier identified some repeated characters. Let's split the
+string according to those characters:
+
+for k, v in character_enumeration(test).items():
+    if v >= 3:
+        this = test.split(k.replace('__count', ''))
+        if len(this) > 1:
+            print(f"Separator: {k.replace('__count', '')}, {this}")
+Separator: s, ['Te', 't thi', ' ', 'tring. 123!@#']
+Separator: t, ['Tes', ' ', 'his s', 'ring. 123!@#']
+
+Now, let's join those back together:
+
+for k, v in character_enumeration(test).items():
+    if v >= 3:
+        this = test.split(k.replace('__count', ''))
+        if len(this) > 1:
+            print(f"Separator: {k.replace('__count', '')}, {this}, Joined: {''.join(this)}")
+Separator: s, ['Te', 't thi', ' ', 'tring. 123!@#'], Joined: Tet thi tring. 123!@#
+Separator: t, ['Tes', ' ', 'his s', 'ring. 123!@#'], Joined: Tes his sring. 123!@#
+
+Let's take what we know now and show what this test variable looks like when it is encoded various ways.  Python has
+many codecs available.  The number of codecs available depends on the version of python you are using.  The human
+readable form of a string looks a certain way but to a machine it be encoded to look many different ways but still
+contain the same data.  This is the basis of data obfuscation. The following script will encode the test variable
+using all of these encodings and provide the binary and base64 encoded output, forward and reverse:
+"""
+
+import pprint
+import base64
+from typing import Dict
+
+test = "Test this string. 123!@#"
+
+codec_list = ['ascii', 'big5', 'big5hkscs', 'cp037', 'cp273', 'cp424', 'cp437', 'cp500', 'cp720', 'cp737', 'cp775',
+              'cp850', 'cp852', 'cp855', 'cp856', 'cp857', 'cp858', 'cp860', 'cp861', 'cp862', 'cp863', 'cp864',
+              'cp865', 'cp866', 'cp869', 'cp874', 'cp875', 'cp932', 'cp949', 'cp950', 'cp1006', 'cp1026',
+              'cp1125', 'cp1140', 'cp1250', 'cp1251', 'cp1252', 'cp1253', 'cp1254', 'cp1255', 'cp1256', 'cp1257',
+              'cp1258', 'cp65001', 'euc_jp', 'euc_jis_2004', 'euc_jisx0213', 'euc_kr', 'gb2312', 'gbk', 'gb18030',
+              'hz', 'iso2022_jp', 'iso2022_jp_1', 'iso2022_jp_2', 'iso2022_jp_2004', 'iso2022_jp_3', 'iso2022_jp_ext',
+              'iso2022_kr', 'latin_1', 'iso8859_2', 'iso8859_3', 'iso8859_4', 'iso8859_5', 'iso8859_6', 'iso8859_7',
+              'iso8859_8', 'iso8859_9', 'iso8859_10', 'iso8859_11', 'iso8859_13', 'iso8859_14', 'iso8859_15',
+              'iso8859_16', 'johab', 'koi8_r', 'koi8_t', 'koi8_u', 'kz1048', 'mac_cyrillic', 'mac_greek',
+              'mac_iceland', 'mac_latin2', 'mac_roman', 'mac_turkish', 'ptcp154', 'shift_jis', 'shift_jis_2004',
+              'shift_jisx0213', 'utf_32', 'utf_32_be', 'utf_32_le', 'utf_16', 'utf_16_be', 'utf_16_le', 'utf_7',
+              'utf_8', 'utf_8_sig']
+
+
+
+def info(string: str) -> Dict:
+    """Returns various attributes of a string and permutations of the string encoded to bytes."""
+    attributes = {
+        'string': string,
+        'type': type(string)
+    }
+    def ordstats(some_string: str):
+        ords = 0
+        count = 0
+        for i in some_string:
+            ords = ords + ord(i)
+            count = count + 1
+        avg = ords / count
+        return ords, avg, count
+
+    if attributes["type"] == str:
+        ords_added, ords_avg, ords_count = ordstats(string)
+        attributes.update(
+            {
+                "hex_list": [hex(ord(i)) for i in string],
+                "reversed": string[::-1],
+                "base64_encoded": base64.encodebytes(b"string").decode("ascii").strip(),
+                "base64_reversed": base64.encodebytes(b"string").decode("ascii").strip()[::-1],
+                "binary": ''.join(map(bin,bytearray(string.encode('ascii')))),
+                "length": len(string),
+                "isupper": string.isupper(),
+                "isdigit": string.isdigit(),
+                "isspace": string.isspace(),
+                "isascii": string.isascii(),
+                "islower": string.islower(),
+                "isalnum": string.isalnum(),
+                "isalpha": string.isalpha(),
+                "istitle": string.istitle(),
+                "ords": [ord(i) for i in string],
+                "ords_added": ords_added,
+                "ords_added_chr": chr(ords_added) if ords_added <= 1114111 else 0,
+                "ords_avg": ords_avg,
+                "ords_avg_chr": chr(int(ords_avg)),
+                "ords_count": ords_count,
+            }
+        )
+        for i in codec_list:
+            try:
+                attributes.update(
+                    {
+                        i: string.encode(i),
+                        i + "_binary": ''.join(map(bin,bytearray(test.encode(i))))
+                    }
+                )
+            except AttributeError as ae:
+                print(ae)
+                pass
+            except UnicodeDecodeError as ude:
+                print(ude)
+                pass
+    return attributes
+
+
+if __name__ == '__main__':
+    pprint.pprint(info(test))
